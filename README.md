@@ -1,2 +1,2 @@
 # Extrator_IPCA_IBGE
-Extrai alguns dados do IPCA do site do IBGE
+Cria um arquivo Excel(xlsx) com alguns dados relevates do IPCA
