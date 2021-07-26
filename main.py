@@ -6,22 +6,29 @@ as informações são:
     Histórico do IPCA desde 94;
     Histórico de pesos dos setores na composição do IPCA;
 """
+print("Importando pacotes 1/5")
 import zipfile
+print("Importando pacotes 2/5")
 import io
+print("Importando pacotes 3/5")
 import requests
+print("Importando pacotes 4/5")
 import openpyxl
+print("Importando pacotes 5/5")
 import pandas as pd
+print("Pacotes importados")
 
-
+print("Requisitando dados")
 URL = "https://sidra.ibge.gov.br/geratabela?format=xlsx&name=tabela7060.xlsx&terr=N&rank=-&query=t/7060/n1/all/v/all/p/all/c315/7169,7170,7445,7486,7558,7625,7660,7712,7766,7786/d/v63%202,v66%204,v69%202,v2265%202/l/,v%2Bt%2Bp,c315"
 
 r = requests.get(URL)
+print("Dados adquiridos com sucesso")
 r = r.content
 
-raw = pd.ExcelFile(r)
-raw = pd.read_excel(raw)
+raw = pd.read_excel(r, engine="openpyxl")
 #raw.head
 
+print("Transformando os dados")
 categoria = raw.iloc[4:14, 0]
 categoria = categoria.rename()
 categoria = categoria.reset_index(drop=True)
@@ -86,6 +93,8 @@ table_main = pd.concat([categoria, ipca_mes_last, ipca_ano_last, ipca_12m_last],
 table_main.columns = ["", ipca_mes_last.name, "Acumulado no ano", "Acumulado 12 meses"]
 #table_main
 
+print("Dados Transformados com sucesso")
+
 URL_HIST = "https://ftp.ibge.gov.br/Precos_Indices_de_Precos_ao_Consumidor/IPCA/Serie_Historica/ipca_SerieHist.zip"
 
 hist_raw = requests.get(URL_HIST, stream=True)
@@ -93,6 +102,7 @@ hist_raw = zipfile.ZipFile(io.BytesIO(hist_raw.content))
 
 hist_raw_filename = str(hist_raw.filelist[0])
 hist_raw_filename = hist_raw_filename.split("'")[1]
+
 
 hist_raw = hist_raw.read(hist_raw_filename)
 hist_raw = pd.ExcelFile(hist_raw)
@@ -117,6 +127,7 @@ table_hist = pd.concat([data_str, hist.iloc[:,2]], axis=1)
 table_hist.columns = ["Data", "IPCA no Mês"]
 #table_hist
 
+print("Construindo planilha")
 with pd.ExcelWriter("RENAN STELLET IPCA.xlsx") as writer:
     table_main.to_excel(writer, index=False, sheet_name="Tabela")
     table_hist.to_excel(writer, index=False, sheet_name="IPCA mensal histórico")
@@ -149,3 +160,4 @@ xcl_hist.column_dimensions["A"].width = 12
 xcl_hist.column_dimensions["B"].width = 12
 
 workbook.save("RENAN STELLET IPCA.xlsx")
+print("Planilha construída com sucesso")

@@ -1,0 +1,1 @@
+cxfreeze -c main.py --target-dir dist2 --base "Win32GUI"
